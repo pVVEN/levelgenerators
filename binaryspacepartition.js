@@ -15,16 +15,24 @@ BSP.prototype = {
 	create: function()
 	{
 		console.log("binaryspacepartition.js - create()");
-		//
+		game.add.sprite(0, 0, 'bg_background');
+		Camera.init();
+
+		buildLevel();
 	},
 
 	update: function()
 	{
-		//
+		Camera.update();
 	},
 
 	render: function()
 	{
 		//
 	}
+};
+
+function buildLevel()
+{
+	//
 };
