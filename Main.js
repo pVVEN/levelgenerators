@@ -17,7 +17,7 @@ Main.prototype = {
 		Camera.init();
 
 		game.state.add('BSP', BSP);
-		game.state.start('BSP');
+		game.state.start('BSP', true, false, 2048, 2048);
 	},
 
 	update: function()
