@@ -3,8 +3,10 @@ var levelArr = [];
 var numTilesWidth = 0;
 var numTilesHeight = 0;
 var tileSize = 32;
-var minWidth = 12;
-var minHeight = 12;
+var minRoomWidth = 6;
+var minRoomHeight = 6;
+var maxRoomWidth = 12;
+var maxRoomHeight = 12;
 
 BSP.prototype = {
 	init: function(levelWidth, levelHeight)
@@ -84,9 +86,38 @@ function cutVertical(tileStartX, tileStartY, areaWidth, areaHeight)
 	//-----------------------------------------------------------------
 
 	var splitX = randomValueBetweenNumbers(tileStartX, areaWidth);
-	if(splitX < minWidth)
+
+	var leftWidth = splitX - tileStartX;
+	var rightWidth = areaWidth - (splitX + 1);
+
+	if(areaHeight >= minRoomHeight)
 	{
-		var temp = minWidth - splitX;
+		//if the height of the room is larger than the minimum, cut each side
+		cutHorizontal(tileStartX, tileStartY, leftWidth, areaHeight);
+		cutHorizontal(splitX+1, tileStartY, areaWidth-leftWidth, areaHeight);
+	}else{
+		//if the size of the left side is within the minimum, cut it vertically, or build a room
+		if(leftWidth >= minRoomWidth && leftWidth <= maxRoomWidth)
+		{
+			cutVertical(tileStartX, tileStartY, splitX, areaHeight);
+		}else{
+			plotRoom(tileStartX, tileStartY, splitX, areaHeight);
+		}
+
+		//if the size of the right side is within the minimum, cut it vertically, or build a room
+		if(rightWidth >= minRoomWidth && rightWidth <= maxRoomWidth)
+		{
+			cutVertical(splitX+1, tileStartY, areaWidth-rightWidth, areaHeight);
+		}else{
+			plotRoom(splitX+1, tileStartY, areaWidth-rightWidth, areaHeight);
+		}
+	}
+
+	/*
+	var splitX = randomValueBetweenNumbers(tileStartX, areaWidth);
+	if(splitX < minRoomWidth)
+	{
+		var temp = minRoomWidth - splitX;
 		splitX += temp;
 	}
 	var leftWidth = splitX - tileStartX;
@@ -100,7 +131,7 @@ function cutVertical(tileStartX, tileStartY, areaWidth, areaHeight)
 		cutHorizontal(splitX+1, tileStartY, rightWidth, areaHeight);
 	}else{
 		//check left side width
-		if(leftWidth >= minWidth)
+		if(leftWidth >= minRoomWidth)
 		{
 			//cutVertical(tileStartX, tileStartY, leftWidth, areaHeight);
 		//}else{
@@ -109,7 +140,7 @@ function cutVertical(tileStartX, tileStartY, areaWidth, areaHeight)
 		}
 
 		//check right side width
-		if(rightWidth >= minWidth)
+		if(rightWidth >= minRoomWidth)
 		{
 			//cutVertical(tileStartX, tileStartY, rightWidth, areaHeight);
 		//}else{
@@ -117,6 +148,7 @@ function cutVertical(tileStartX, tileStartY, areaWidth, areaHeight)
 			plotRoom(tileStartX, tileStartY, rightWidth, areaHeight);
 		}
 	}
+	*/
 };
 
 function cutHorizontal(tileStartX, tileStartY, areaWidth, areaHeight)
@@ -144,6 +176,35 @@ function cutHorizontal(tileStartX, tileStartY, areaWidth, areaHeight)
 	//-----------------------------------------------------------------
 
 	var splitY = randomValueBetweenNumbers(tileStartY, areaHeight);
+
+	var topHeight = splitY - tileStartY;
+	var bottomHeight = areaHeight - (splitY + 1);
+
+	if(areaWidth >= minRoomWidth)
+	{
+		//if the height of the room is larger than the minimum, cut each side
+		cutVertical(tileStartX, tileStartY, areaWidth, topHeight);
+		cutVertical(tileStartX, splitY+1, areaWidth, bottomHeight);
+	}else{
+		//if the size of the top side is within the minimum, cut it vertically, or build a room
+		if(topHeight >= minRoomHeight && topHeight <= minRoomHeight)
+		{
+			cutHorizontal(tileStartX, tileStartY, areaWidth, splitY);
+		}else{
+			plotRoom(tileStartX, tileStartY, areaWidth, splitY);
+		}
+
+		//if the size of the bottom side is within the minimum, cut it vertically, or build a room
+		if(bottomHeight >= minRoomHeight && bottomHeight <= minRoomHeight)
+		{
+			cutHorizontal(tileStartX, splitY+1, areaWidth, areaHeight-bottomHeight);
+		}else{
+			plotRoom(tileStartX, splitY+1, areaWidth, areaHeight-bottomHeight);
+		}
+	}
+
+	/*
+	var splitY = randomValueBetweenNumbers(tileStartY, areaHeight);
 	if(splitY < minHeight)
 	{
 		var temp = minHeight - splitY;
@@ -154,7 +215,7 @@ function cutHorizontal(tileStartX, tileStartY, areaWidth, areaHeight)
 	console.log("areaWidth: "+areaWidth+", topHeight: "+topHeight+", bottomHeight: "+bottomHeight);
 
 	//check width
-	if(areaWidth >= minWidth)
+	if(areaWidth >= minRoomWidth)
 	{
 		cutVertical(tileStartX, tileStartY, areaWidth, topHeight);
 		cutVertical(tileStartX, topHeight+1, areaWidth, bottomHeight)
@@ -177,6 +238,7 @@ function cutHorizontal(tileStartX, tileStartY, areaWidth, areaHeight)
 			plotRoom(tileStartX, tileStartY, areaWidth, bottomHeight);
 		}
 	}
+	*/
 };
 
 function plotRoom(tileStartX, tileStartY, areaWidth, areaHeight)
@@ -209,9 +271,9 @@ function placeTiles()
 	// }
 };
 
-function randomValueBetweenNumbers(min,max)
+function randomValueBetweenNumbers(min, max)
 {
-	// console.log("min: "+min+", max: "+max);
-	// console.log("result: "+Math.floor(Math.random()*(max-min+1)+min));
+	console.log("min: "+min+", max: "+max);
+	console.log("result: "+Math.floor(Math.random()*(max-min+1)+min));
     return Math.floor(Math.random()*(max-min+1)+min);
 };
