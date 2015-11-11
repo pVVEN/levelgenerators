@@ -7,7 +7,8 @@ Main.prototype = {
 		game.load.image('bg_background', 'background.png');
 		game.load.image('img_leveltiles', 'leveltiles.png');
 		game.load.script('Camera', 'Camera.js');
-		game.load.script('BSP', 'binaryspacepartition.js');
+		//game.load.script('BSP', 'binaryspacepartition.js');
+		game.load.script('BSP2', 'bsp2.js');
 	},
 
 	create: function ()
@@ -16,8 +17,11 @@ Main.prototype = {
 		game.world.setBounds(0, 0, 2048, 2048);
 		Camera.init();
 
-		game.state.add('BSP', BSP);
-		game.state.start('BSP', true, false, 2048, 2048);
+		//game.state.add('BSP', BSP);
+		//game.state.start('BSP', true, false, 2048, 2048);
+
+		game.state.add('BSP2', BSP2);
+		game.state.start('BSP2', true, false, 2048, 2048);
 	},
 
 	update: function()

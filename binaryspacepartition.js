@@ -63,7 +63,7 @@ function buildLevel()
 	//
 	console.log("binaryspacepartition.js - buildLevel()");
 
-	cutVertical(0, 0, numTilesWidth, numTilesHeight);
+	cutVertical(1, 1, numTilesWidth, numTilesHeight);
 };
 
 function cutVertical(tileStartX, tileStartY, areaWidth, areaHeight)
@@ -89,6 +89,8 @@ function cutVertical(tileStartX, tileStartY, areaWidth, areaHeight)
 
 	var leftWidth = splitX - tileStartX;
 	var rightWidth = areaWidth - (splitX + 1);
+
+	console.log("splitX: "+splitX+", leftWidth: "+leftWidth+", rightWidth: "+rightWidth+", total width: "+(leftWidth+rightWidth));
 
 	if(areaHeight >= minRoomHeight)
 	{
@@ -179,6 +181,8 @@ function cutHorizontal(tileStartX, tileStartY, areaWidth, areaHeight)
 
 	var topHeight = splitY - tileStartY;
 	var bottomHeight = areaHeight - (splitY + 1);
+
+	console.log("splitY: "+splitY+", topHeight: "+topHeight+", bottomHeight: "+bottomHeight+", total height: "+(topHeight+bottomHeight));
 
 	if(areaWidth >= minRoomWidth)
 	{
