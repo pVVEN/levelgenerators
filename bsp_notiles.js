@@ -1,11 +1,17 @@
+/***************
+
+NEED TO FIX TO BE TRANSLATION OF ORIGINAL CODE
+http://eskerda.com/bsp-dungeon-generation/
+
+****************/
+
+
 //Constants
 var TILE_SIZE = 32;
 var WIDTH_RATIO = 0.45;
 var HEIGHT_RATIO = 0.45;
 var ITERATIONS = 4;
 var mainRoom = undefined;
-var levelArr = [];
-var map;
 
 var BSP2 = function (){
 	this.levelWidth = 0;
@@ -19,56 +25,36 @@ var BSP2 = function (){
 BSP2.prototype = {
 	init: function(levelWidth, levelHeight)
 	{
-		//console.log("bsp2.js - init("+levelWidth+", "+levelHeight+")");
+		console.log("bsp2.js - init("+levelWidth+", "+levelHeight+")");
 		this.levelWidth = levelWidth;
 		this.levelHeight = levelHeight;
 
 		this.tilesPerRow = levelWidth/TILE_SIZE;
 		this.tilesPerColumn = levelHeight/TILE_SIZE;
-		//console.log("    tilesPerRow: "+this.tilesPerRow+", tilesPerColumn: "+this.tilesPerColumn);
+		console.log("    tilesPerRow: "+this.tilesPerRow+", tilesPerColumn: "+this.tilesPerColumn);
 
 		mainRoom = new RoomContainer(0, 0, this.levelWidth, this.levelHeight);
-
-		levelArr = new Array(this.tilesPerColumn);
-		for(var i = 0; i < this.tilesPerColumn; i++)
-		{
-			levelArr[i] = new Array(this.tilesPerColumn);
-		}
-
-		for(var c = 0; c < this.tilesPerColumn; c++)
-		{
-			for(var r = 0; r < this.tilesPerRow; r++)
-			{
-				levelArr[c][r] = 0;
-			}
-		}
-
-		//console.log(levelArr.toString());
 	},
 
 	preload: function()
 	{
-		//console.log("bsp2.js - preload()");
+		console.log("bsp2.js - preload()");
 		//
 	},
 
 	create: function()
 	{
-		//console.log("bsp2.js - create()");
+		console.log("bsp2.js - create()");
 		game.add.sprite(0, 0, 'bg_background');
+
+		//this.drawGrid();
 
 		Camera.init();
 
 		this.roomTree = splitRoom(mainRoom, ITERATIONS);
 		this.growRooms();
-
-		//this.drawGrid();
-		//this.drawPartitions();
+		this.drawPartitions();
 		this.drawRooms();
-
-		//console.log(levelArr.toString());
-
-		this.drawTiles();
 	},
 
 	update: function()
@@ -113,16 +99,6 @@ BSP2.prototype = {
 		{
 			this.rooms[i].paint();
 		}
-	},
-
-	drawTiles: function()
-	{
-		console.log("drawTiles()");
-
-		game.load.tilemap('map', levelArr.toString(), null, Phaser.Tilemap.CSV);
-		map = game.add.tilemap('map');//, null, TILE_SIZE, TILE_SIZE, this.tilesPerRow, this.tilesPerColumn);
-		map.addTilesetImage('img_leveltiles');
-		map.create('world', this.tilesPerRow, this.tilesPerColumn, TILE_SIZE, TILE_SIZE);
 	}
 };
 
@@ -205,7 +181,7 @@ var Room = function(x, y, w, h)
 Room.prototype = {
 	paint: function()
 	{
-		//console.log("Room.paint() - drawing "+this.w+" x "+this.h+" room at "+this.x+", "+this.y);
+		console.log("Room.paint() - drawing "+this.w+" x "+this.h+" room at "+this.x+", "+this.y);
 		var bmd_blueBorder = game.add.bitmapData(this.w, this.h);
 		bmd_blueBorder.rect(0, 0, this.w, this.h);
 		bmd_blueBorder.fill(0, 102, 255);
@@ -231,45 +207,16 @@ var RoomContainer = function(x, y, w, h)
 RoomContainer.prototype = {
 	growRoom: function()
 	{
-		var x, y, w, h, padX, padY, sizeX, sizeY, randWOne, randHOne, tileX, tileY, tileW, tileH;
+		var x, y, w, h;
 
-		//console.log("growRoom() - this x: "+this.x+", y: "+this.y+", w: "+this.w+", h: "+this.h);
-		//rooms given random padding
-		padX = random(1, 3) * TILE_SIZE; //using 1 instead of 0 because we don't want walls to touch
-		padY = random(1, 3) * TILE_SIZE;
-		//console.log("padX: "+padX+", padY: "+padY);
-		x = this.x + padX;
-		y = this.y + padY;
-		//console.log("x: "+x+", y: "+y);
+		x = this.x + random(1, Math.floor(this.w/3)); //using 1 instead of 0 because we don't want walls to touch
+		y = this.y + random(1, Math.floor(this.h/3));
 		w = this.w - (x - this.x);
 		h = this.h - (y - this.y);
-		//console.log("this.w - (x - this.x): "+w);
-		//console.log("this.h - (y - this.y): "+h);
-		sizeX = random(1, 3) * TILE_SIZE;
-		sizeY = random(1, 3) * TILE_SIZE;
-		w -= sizeX;
-		h -= sizeY;
-		//console.log("sizeX: "+sizeX+", sizeY: "+sizeY+", w: "+w+", h: "+h);
-
-		//update level array
-		tileX = (x/TILE_SIZE)-1;
-		tileY = (y/TILE_SIZE)-1;
-		tileW = (w/TILE_SIZE)+tileX;
-		tileH = (h/TILE_SIZE)+tileY;
-		//console.log("tileX: "+tileX+", tileY: "+tileY+", tileW: "+tileW+", tileH: "+tileH);
-		for(var c = tileY; c < tileH; c++)
-		{
-			//console.log("c: "+c+", h: "+(h/TILE_SIZE));
-			for(var r = tileX; r < tileW; r++)
-			{
-				//console.log("r: "+r+", w: "+(w/TILE_SIZE));
-				levelArr[c][r] = 17;
-				//console.log("levelArr["+c+"]["+r+"]: "+levelArr[c][r]);
-			}
-		}
+		w -= random(1, w/3);
+		h -= random(1, h/3);
 
 		this.room = new Room(x, y, w, h);
-		//console.log("---------------------------------------------------------");
 	},
 
 	paint: function()
@@ -301,7 +248,6 @@ function splitRoom(room, iteration)
 {
 	var root = new Tree(room);
 
-	//console.log("SPLIT "+iteration+": room x: "+room.x+", y: "+room.y+", w: "+room.w+", h: "+room.h);
 	if(iteration != 0)
 	{
 		var split = randomSplit(room);
@@ -314,16 +260,15 @@ function splitRoom(room, iteration)
 
 function randomSplit(room)
 {
-	var roomOne, roomTwo, randOne, randTwo;
+	var roomOne, roomTwo;
 
 	if(random(0, 1) == 0)
 	{
 		//Vertical
-		randOne = random(1, (room.w/TILE_SIZE));
 		roomOne = new RoomContainer(
 			room.x, 			//roomOne.x
 			room.y, 			//roomOne.y
-			randOne*TILE_SIZE, 	//roomOne.w
+			random(1, room.w), 	//roomOne.w
 			room.h 				//roomOne.h
 		);
 
@@ -333,10 +278,6 @@ function randomSplit(room)
 			room.w - roomOne.w, //roomTwo.w
 			room.h 				//roomTwo.h
 		);
-		// console.log("randomSplit() vertical");
-		// console.log("    room One x: "+room.x+", y: "+room.y+", w: "+(randOne*TILE_SIZE)+", h: "+room.h);
-		// console.log("    randOne: "+randOne+", w % TILE_SIZE: "+(randOne*TILE_SIZE)%TILE_SIZE);
-		// console.log("    room Two x: "+(room.x + roomOne.w)+", y: "+room.y+", w: "+(room.w - roomOne.w)+", h: "+room.h);
 
 		var roomOneWidthRatio = roomOne.w / roomOne.h;
 		var roomTwoWidthRatio = roomTwo.w / roomTwo.h;
@@ -347,12 +288,11 @@ function randomSplit(room)
 		}
 	}else{
 		//Horizontal
-		randTwo = random(1, (room.h/TILE_SIZE));
 		roomOne = new RoomContainer(
 			room.x, 			//roomOne.x
 			room.y, 			//roomOne.y
 			room.w, 			//roomOne.w
-			randTwo*TILE_SIZE	//roomOne.h
+			random(1, room.h)	//roomOne.h
 		);
 
 		roomTwo = new RoomContainer(
@@ -361,10 +301,6 @@ function randomSplit(room)
 			room.w, 			//roomTwo.w
 			room.h - roomOne.h 	//roomTwo.h
 		);
-		// console.log("randomSplit() horizontal");
-		// console.log("    room One x: "+room.x+", y: "+room.y+", w: "+room.w+", h: "+(randTwo*TILE_SIZE));
-		// console.log("    randTwo: "+randTwo+", h % TILE_SIZE: "+(randTwo*TILE_SIZE)%TILE_SIZE);
-		// console.log("    room Two x: "+room.x+", y: "+(room.y + roomOne.h)+", w: "+room.w+", h: "+(room.h - roomOne.h));
 
 		var roomOneHeightRatio = roomOne.h / roomOne.w;
 		var roomTwoHeightRatio = roomTwo.h / roomTwo.w;
