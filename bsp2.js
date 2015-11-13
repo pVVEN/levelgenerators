@@ -49,7 +49,7 @@ BSP2.prototype = {
 	preload: function()
 	{
 		//console.log("bsp2.js - preload()");
-		//
+		game.load.image('img_leveltiles_test', 'leveltiles_test.png');
 	},
 
 	create: function()
@@ -118,11 +118,33 @@ BSP2.prototype = {
 	drawTiles: function()
 	{
 		console.log("drawTiles()");
+		/*
+		console.log(levelArr.toString());
+		//game.load.tilemap('tilemap', null, [levelArr.toString()], Phaser.Tilemap.TILED_JSON);
+		game.load.tilemap('tilemap', null, levelArr.toString(), Phaser.Tilemap.CSV);
+		console.log("adding tilemap");
+		map = game.add.tilemap('tilemap');//, TILE_SIZE, TILE_SIZE, this.levelWidth/TILE_SIZE, this.levelHeight/TILE_SIZE);
+		console.log("adding tileset image");
+		var layer = map.createBlankLayer('tileimage');
+		map.addTilesetImage('tileimage', 'img_leveltiles_test', TILE_SIZE, TILE_SIZE);
+		console.log("calling create");
+		map.create('firstlevel', this.levelWidth/TILE_SIZE, this.levelHeight/TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
-		game.load.tilemap('map', levelArr.toString(), null, Phaser.Tilemap.CSV);
-		map = game.add.tilemap('map');//, null, TILE_SIZE, TILE_SIZE, this.tilesPerRow, this.tilesPerColumn);
-		map.addTilesetImage('img_leveltiles');
-		map.create('world', this.tilesPerRow, this.tilesPerColumn, TILE_SIZE, TILE_SIZE);
+		console.log("tiles rendered");
+		//debugger;
+		*/
+
+		var levelStr = levelArr.toString();
+		levelStr = levelStr.replace(/(\S{128})/g,"$1");
+		levelStr = levelStr.replace(/(\S{128})/g,"$1\n");
+		levelStr = levelStr.replace(/\n$/,"");
+
+		console.log(levelStr);
+
+		// var parsed = Phaser.TilemapParser.parseCSV(levelStr, TILE_SIZE, TILE_SIZE);
+		// game.cache.addTilemap('test', parsed);
+		// map.addTilesetImage('tileimage', 'img_leveltiles_test', TILE_SIZE, TILE_SIZE);
+		// map.create('firstlevel', this.levelWidth/TILE_SIZE, this.levelHeight/TILE_SIZE, TILE_SIZE, TILE_SIZE);
 	}
 };
 
@@ -263,7 +285,7 @@ RoomContainer.prototype = {
 			for(var r = tileX; r < tileW; r++)
 			{
 				//console.log("r: "+r+", w: "+(w/TILE_SIZE));
-				levelArr[c][r] = 17;
+				levelArr[c][r] = 1;
 				//console.log("levelArr["+c+"]["+r+"]: "+levelArr[c][r]);
 			}
 		}
