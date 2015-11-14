@@ -6,8 +6,8 @@ Main.prototype = {
 	preload: function ()
 	{
 		game.load.image('bg_background', 'background.png');
-		game.load.image('img_leveltiles', 'leveltiles.png');
-		game.load.image('img_leveltiles_test', 'leveltiles_test.png');
+		//game.load.image('img_leveltiles', 'leveltiles.png');
+		//game.load.image('img_leveltiles_test', 'leveltiles_test.png');
 		game.load.script('Camera', 'Camera.js');
 		//game.load.script('BSP', 'binaryspacepartition.js');
 		game.load.script('BSP2', 'bsp2.js');

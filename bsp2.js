@@ -5,7 +5,7 @@ var HEIGHT_RATIO = 0.45;
 var ITERATIONS = 4;
 var mainRoom = undefined;
 var levelArr = [];
-var map;
+var map = undefined;
 
 var BSP2 = function (){
 	this.levelWidth = 0;
@@ -134,17 +134,94 @@ BSP2.prototype = {
 		//debugger;
 		*/
 
-		var levelStr = levelArr.toString();
-		levelStr = levelStr.replace(/(\S{128})/g,"$1");
-		levelStr = levelStr.replace(/(\S{128})/g,"$1\n");
-		levelStr = levelStr.replace(/\n$/,"");
+		var levelStr = "";
 
-		console.log(levelStr);
+		for(var i = 0; i < levelArr.length; i++)
+		{
+			levelStr += levelArr[i].toString();
+			if(i < levelArr.length-1)
+			{
+				levelStr += "\n";
+			}
+		}
 
-		// var parsed = Phaser.TilemapParser.parseCSV(levelStr, TILE_SIZE, TILE_SIZE);
-		// game.cache.addTilemap('test', parsed);
-		// map.addTilesetImage('tileimage', 'img_leveltiles_test', TILE_SIZE, TILE_SIZE);
-		// map.create('firstlevel', this.levelWidth/TILE_SIZE, this.levelHeight/TILE_SIZE, TILE_SIZE, TILE_SIZE);
+		/**
+	    * Parses a CSV file into valid map data.
+	    *
+	    * @method Phaser.TilemapParser.parseCSV
+	    * @param {string} data - The CSV file data.
+	    * @param {number} [tileWidth=32] - The pixel width of a single map tile. If using CSV data you must specify this. Not required if using Tiled map data.
+	    * @param {number} [tileHeight=32] - The pixel height of a single map tile. If using CSV data you must specify this. Not required if using Tiled map data.
+	    * @return {object} Generated map data.
+	    */
+	    //parseCSV: function (key, data, tileWidth, tileHeight)
+		var parsed = Phaser.TilemapParser.parseCSV('sdfsdf', levelStr, TILE_SIZE, TILE_SIZE);
+
+		/**
+	    * Add a new tilemap to the Cache.
+	    *
+	    * @method Phaser.Cache#addTilemap
+	    * @param {string} key - The key that this asset will be stored in the cache under. This should be unique within this cache.
+	    * @param {string} url - The URL the asset was loaded from. If the asset was not loaded externally set to `null`.
+	    * @param {object} mapData - The tilemap data object (either a CSV or JSON file).
+	    * @param {number} format - The format of the tilemap data.
+	    */
+	    //addTilemap: function (key, url, mapData, format)
+		game.cache.addTilemap('test', null, parsed, Phaser.Tilemap.CSV);
+
+		/**
+		* Creates a new Phaser.Tilemap object.
+		*
+		* The map can either be populated with data from a Tiled JSON file or from a CSV file.
+		* To do this pass the Cache key as the first parameter. When using Tiled data you need only provide the key.
+		* When using CSV data you must provide the key and the tileWidth and tileHeight parameters.
+		* If creating a blank tilemap to be populated later, you can either specify no parameters at all and then use `Tilemap.create` or pass the map and tile dimensions here.
+		* Note that all Tilemaps use a base tile size to calculate dimensions from, but that a TilemapLayer may have its own unique tile size that overrides it.
+		*
+		* @method Phaser.GameObjectFactory#tilemap
+		* @param {string} [key] - The key of the tilemap data as stored in the Cache. If you're creating a blank map either leave this parameter out or pass `null`.
+		* @param {number} [tileWidth=32] - The pixel width of a single map tile. If using CSV data you must specify this. Not required if using Tiled map data.
+		* @param {number} [tileHeight=32] - The pixel height of a single map tile. If using CSV data you must specify this. Not required if using Tiled map data.
+		* @param {number} [width=10] - The width of the map in tiles. If this map is created from Tiled or CSV data you don't need to specify this.
+		* @param {number} [height=10] - The height of the map in tiles. If this map is created from Tiled or CSV data you don't need to specify this.
+		* @return {Phaser.Tilemap} The newly created tilemap object.
+		*/
+		//tilemap: function (key, tileWidth, tileHeight, width, height)
+		map = game.add.tilemap('test', TILE_SIZE, TILE_SIZE, this.levelWidth/TILE_SIZE, this.levelHeight/TILE_SIZE);
+
+		/**
+		* Adds an image to the map to be used as a tileset. A single map may use multiple tilesets.
+		* Note that the tileset name can be found in the JSON file exported from Tiled, or in the Tiled editor.
+		*
+		* @method Phaser.Tilemap#addTilesetImage
+		* @param {string} tileset - The name of the tileset as specified in the map data.
+		* @param {string|Phaser.BitmapData} [key] - The key of the Phaser.Cache image used for this tileset.
+		*     If `undefined` or `null` it will look for an image with a key matching the tileset parameter.
+		*     You can also pass in a BitmapData which can be used instead of an Image.
+		* @param {number} [tileWidth=32] - The width of the tiles in the Tileset Image. If not given it will default to the map.tileWidth value, if that isn't set then 32.
+		* @param {number} [tileHeight=32] - The height of the tiles in the Tileset Image. If not given it will default to the map.tileHeight value, if that isn't set then 32.
+		* @param {number} [tileMargin=0] - The width of the tiles in the Tileset Image. If not given it will default to the map.tileWidth value.
+		* @param {number} [tileSpacing=0] - The height of the tiles in the Tileset Image. If not given it will default to the map.tileHeight value.
+		* @param {number} [gid=0] - If adding multiple tilesets to a blank/dynamic map, specify the starting GID the set will use here.
+		* @return {Phaser.Tileset} Returns the Tileset object that was created or updated, or null if it failed.
+		*/
+		//addTilesetImage: function (tileset, key, tileWidth, tileHeight, tileMargin, tileSpacing, gid)
+		map.addTilesetImage('tileimage', 'img_leveltiles_test', TILE_SIZE, TILE_SIZE);
+
+		/**
+		* Creates an empty map of the given dimensions and one blank layer. If layers already exist they are erased.
+		*
+		* @method Phaser.Tilemap#create
+		* @param {string} name - The name of the default layer of the map.
+		* @param {number} width - The width of the map in tiles.
+		* @param {number} height - The height of the map in tiles.
+		* @param {number} tileWidth - The width of the tiles the map uses for calculations.
+		* @param {number} tileHeight - The height of the tiles the map uses for calculations.
+		* @param {Phaser.Group} [group] - Optional Group to add the layer to. If not specified it will be added to the World group.
+		* @return {Phaser.TilemapLayer} The TilemapLayer object. This is an extension of Phaser.Image and can be moved around the display list accordingly.
+		*/
+		//create: function (name, width, height, tileWidth, tileHeight, group)
+		map.create('firstlevel', this.levelWidth/TILE_SIZE, this.levelHeight/TILE_SIZE, TILE_SIZE, TILE_SIZE);
 	}
 };
 
