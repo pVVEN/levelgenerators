@@ -155,7 +155,9 @@ BSP2.prototype = {
 	    * @return {object} Generated map data.
 	    */
 	    //parseCSV: function (key, data, tileWidth, tileHeight)
-		var parsed = Phaser.TilemapParser.parseCSV('sdfsdf', levelStr, TILE_SIZE, TILE_SIZE);
+	    console.log(typeof levelStr);
+		var parsed = Phaser.TilemapParser.parseCSV('sdfsdf', levelStr.toString(), TILE_SIZE, TILE_SIZE);
+		console.log("csv parsed");
 
 		/**
 	    * Add a new tilemap to the Cache.
