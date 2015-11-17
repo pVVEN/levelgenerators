@@ -4,7 +4,7 @@ var WIDTH_RATIO = 0.45;
 var HEIGHT_RATIO = 0.45;
 var ITERATIONS = 4;
 var mainRoom = undefined;
-var levelArr = [];
+var levelArr, decorationsArr, obstaclesArr, mobsArr, itemsArr = [];
 var map = undefined;
 
 var BSP = function (){
@@ -61,6 +61,7 @@ BSP.prototype = {
 
 		this.roomTree = splitRoom(mainRoom, ITERATIONS);
 		this.growRooms();
+		this.buildPaths();
 
 		this.drawTiles();
 
@@ -82,6 +83,16 @@ BSP.prototype = {
 		{
 			leafs[i].growRoom();
 			this.rooms.push(leafs[i].room);
+		}
+	},
+
+	buildPaths: function(tree)
+	{
+		if(tree.lChild !== undefined && tree.rChild !== undefined)
+		{
+			tree.lChild.leaf.buildPath(tree.rChild.leaf.center);
+			this.buildPaths(tree.lChild);
+			this.buildPaths(tree.rChild);
 		}
 	},
 
@@ -115,7 +126,7 @@ BSP.prototype = {
 
 	drawTiles: function()
 	{
-		console.log("drawTiles()");
+		//console.log("drawTiles()");
 
 		var levelStr = '';
 
@@ -138,29 +149,13 @@ BSP.prototype = {
 	        }
 	    }
 
-	    //parseCSV: function (key, data, tileWidth, tileHeight)
-	    /*
-	    console.log(typeof levelStr);
-		var parsed = Phaser.TilemapParser.parseCSV('sdfsdf', levelStr.toString(), TILE_SIZE, TILE_SIZE);
-		console.log("csv parsed");
-		debugger;
-		*/
-
-	    //addTilemap: function (key, url, mapData, format)
-		//game.cache.addTilemap('test', null, parsed, Phaser.Tilemap.CSV);
+	    //console.log(levelStr);
 		game.cache.addTilemap('test', null, levelStr, Phaser.Tilemap.CSV);
-
-		//tilemap: function (key, tileWidth, tileHeight, width, height)
 		map = game.add.tilemap('test', TILE_SIZE, TILE_SIZE, this.levelWidth/TILE_SIZE, this.levelHeight/TILE_SIZE);
-
-		//addTilesetImage: function (tileset, key, tileWidth, tileHeight, tileMargin, tileSpacing, gid)
 		map.addTilesetImage('tileimage', 'img_leveltiles', TILE_SIZE, TILE_SIZE);
 
 		var layer = map.createLayer(0);
 		layer.resizeWorld();
-
-		//create: function (name, width, height, tileWidth, tileHeight, group)
-		//map.create('firstlevel', this.levelWidth/TILE_SIZE, this.levelHeight/TILE_SIZE, TILE_SIZE, TILE_SIZE);
 	}
 };
 
@@ -241,6 +236,11 @@ var Room = function(x, y, w, h)
 };
 
 Room.prototype = {
+	buildPath: function(roomCenter)
+	{
+		console.log("Room.buildPath - center x: "+roomCenter.x+", y: "+roomCenter.y);
+	},
+
 	paint: function()
 	{
 		//console.log("Room.paint() - drawing "+this.w+" x "+this.h+" room at "+this.x+", "+this.y);
@@ -290,22 +290,23 @@ RoomContainer.prototype = {
 		//console.log("sizeX: "+sizeX+", sizeY: "+sizeY+", w: "+w+", h: "+h);
 
 		//update level array
-		tileX = (x/TILE_SIZE)-1;
-		tileY = (y/TILE_SIZE)-1;
+		tileX = (x/TILE_SIZE);//-1; //removing the -1 part fits tiles within drawn borders
+		tileY = (y/TILE_SIZE);//-1;
 		tileW = (w/TILE_SIZE)+tileX;
 		tileH = (h/TILE_SIZE)+tileY;
-		//console.log("tileX: "+tileX+", tileY: "+tileY+", tileW: "+tileW+", tileH: "+tileH);
+		//console.log("    tileX: "+tileX+", tileY: "+tileY+", tileW: "+tileW+", tileH: "+tileH);
 		for(var c = tileY; c < tileH; c++)
 		{
-			//console.log("c: "+c+", h: "+(h/TILE_SIZE));
+			//console.log("    c: "+c+", h: "+(h/TILE_SIZE));
 			for(var r = tileX; r < tileW; r++)
 			{
-				//console.log("r: "+r+", w: "+(w/TILE_SIZE));
+				//console.log("    r: "+r+", w: "+(w/TILE_SIZE));
 				levelArr[c][r] = 1;
-				//console.log("levelArr["+c+"]["+r+"]: "+levelArr[c][r]);
+				//console.log("    levelArr["+c+"]["+r+"]: "+levelArr[c][r]);
 			}
 		}
 
+		//console.log("    new room("+x+", "+y+", "+w+", "+h+")");
 		this.room = new Room(x, y, w, h);
 		//console.log("---------------------------------------------------------");
 	},
@@ -320,6 +321,12 @@ RoomContainer.prototype = {
 		game.add.sprite(this.x, this.y, bmd_greenBorder);
 	}
 };
+
+//====================================================
+//		PATH FUNCTIONS
+//====================================================
+
+
 
 //====================================================
 //		FUNCTIONS
