@@ -92710,9 +92710,7 @@ Phaser.TilemapParser = {
         var map = this.getEmptyData();
 
         //  Trim any rogue whitespace from the data
-        var trimmed = data.toString().trim();
-        data = trimmed;
-        //data = data.trim();
+        data = data.trim();
 
         var output = [];
         var rows = data.split("\n");
