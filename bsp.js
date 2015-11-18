@@ -59,11 +59,14 @@ BSP.prototype = {
 
 		Camera.init();
 
+		console.log("splitting up level");
 		this.roomTree = splitRoom(mainRoom, ITERATIONS);
+		console.log("rearranging rooms");
 		this.growRooms();
-		this.buildPaths();
+		console.log("building paths");
 
 		this.drawTiles();
+		this.buildPaths(this.roomTree);
 
 		//this.drawGrid();
 		//this.drawPartitions();
@@ -90,7 +93,12 @@ BSP.prototype = {
 	{
 		if(tree.lChild !== undefined && tree.rChild !== undefined)
 		{
-			tree.lChild.leaf.buildPath(tree.rChild.leaf.center);
+			if(tree.lChild.leaf.room !== undefined && tree.rChild.leaf.room !== undefined)
+			{
+				console.log("left room: "+tree.lChild.leaf.room+", right room: "+tree.rChild.leaf.room);
+				tree.lChild.leaf.room.buildPath(tree.rChild.leaf.room.center);
+			}
+
 			this.buildPaths(tree.lChild);
 			this.buildPaths(tree.rChild);
 		}
@@ -238,7 +246,13 @@ var Room = function(x, y, w, h)
 Room.prototype = {
 	buildPath: function(roomCenter)
 	{
-		console.log("Room.buildPath - center x: "+roomCenter.x+", y: "+roomCenter.y);
+		//DRAW ROOM LEAF/ROOMCONTAINER CENTER TO OTHER LEAF/ROOMCONTAINER CENTER
+		console.log("Room.buildPath - from ("+this.center.x+", "+this.center.y+") to ("+roomCenter.x+", "+roomCenter.y+")");
+		var bmd_blueBorder = game.add.bitmapData(this.center.x, this.center.y);
+		bmd_blueBorder.rect(0, 0, roomCenter.x-this.center.x, (roomCenter.y-this.center.y)+1);
+		bmd_blueBorder.fill(0, 102, 255);
+		//bmd_blueBorder.clear(1, 1, this.w-2, this.h-2);
+		game.add.sprite(this.center.x, this.center.y, bmd_blueBorder);
 	},
 
 	paint: function()
@@ -258,7 +272,7 @@ Room.prototype = {
 
 var RoomContainer = function(x, y, w, h)
 {
-	BSP.call(this, x, y, w, h);
+	//Room.call(this, x, y, w, h);
 	this.x = x;
 	this.y = y;
 	this.w = w;
@@ -266,6 +280,8 @@ var RoomContainer = function(x, y, w, h)
 	this.room = undefined;
 };
 
+//RoomContainer.prototype = Object.create(Room.prototype);
+//RoomContainer.prototype.constructor = RoomContainer;
 RoomContainer.prototype = {
 	growRoom: function()
 	{
