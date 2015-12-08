@@ -65,11 +65,11 @@ BSP.prototype = {
 		this.growRooms();
 		console.log("building paths");
 
-		this.drawTiles();
 		this.buildPaths(this.roomTree);
+		//this.drawTiles();
 
 		//this.drawGrid();
-		//this.drawPartitions();
+		this.drawPartitions();
 		this.drawRooms();
 	},
 
@@ -93,11 +93,17 @@ BSP.prototype = {
 	{
 		if(tree.lChild !== undefined && tree.rChild !== undefined)
 		{
+			/*
 			if(tree.lChild.leaf.room !== undefined && tree.rChild.leaf.room !== undefined)
 			{
-				console.log("left room: "+tree.lChild.leaf.room+", right room: "+tree.rChild.leaf.room);
+				console.log("left room: ");
+				console.log(tree.lChild.leaf.room);
+				console.log("right room: ");
+				console.log(tree.rChild.leaf.room);
 				tree.lChild.leaf.room.buildPath(tree.rChild.leaf.room.center);
 			}
+			*/
+			tree.lChild.leaf.buildPath(tree.rChild.leaf.center);
 
 			this.buildPaths(tree.lChild);
 			this.buildPaths(tree.rChild);
@@ -228,42 +234,6 @@ Tree.prototype = {
 			this.rChild.paint();
 		}
 	}
-}
-
-//====================================================
-//		ROOM STUFF
-//====================================================
-
-var Room = function(x, y, w, h)
-{
-	this.x = x;
-	this.y = y;
-	this.w = w;
-	this.h = h;
-	this.center = new Point(this.x + this.w/2, this.y + this.h/2);
-};
-
-Room.prototype = {
-	buildPath: function(roomCenter)
-	{
-		//DRAW ROOM LEAF/ROOMCONTAINER CENTER TO OTHER LEAF/ROOMCONTAINER CENTER
-		console.log("Room.buildPath - from ("+this.center.x+", "+this.center.y+") to ("+roomCenter.x+", "+roomCenter.y+")");
-		var bmd_blueBorder = game.add.bitmapData(this.center.x, this.center.y);
-		bmd_blueBorder.rect(0, 0, roomCenter.x-this.center.x, (roomCenter.y-this.center.y)+1);
-		bmd_blueBorder.fill(0, 102, 255);
-		//bmd_blueBorder.clear(1, 1, this.w-2, this.h-2);
-		game.add.sprite(this.center.x, this.center.y, bmd_blueBorder);
-	},
-
-	paint: function()
-	{
-		//console.log("Room.paint() - drawing "+this.w+" x "+this.h+" room at "+this.x+", "+this.y);
-		var bmd_blueBorder = game.add.bitmapData(this.w, this.h);
-		bmd_blueBorder.rect(0, 0, this.w, this.h);
-		bmd_blueBorder.fill(0, 102, 255);
-		bmd_blueBorder.clear(1, 1, this.w-2, this.h-2);
-		game.add.sprite(this.x, this.y, bmd_blueBorder);
-	}
 };
 
 //====================================================
@@ -277,6 +247,7 @@ var RoomContainer = function(x, y, w, h)
 	this.y = y;
 	this.w = w;
 	this.h = h;
+	this.center = new Point(this.x + this.w/2, this.y + this.h/2);
 	this.room = undefined;
 };
 
@@ -327,6 +298,17 @@ RoomContainer.prototype = {
 		//console.log("---------------------------------------------------------");
 	},
 
+	buildPath: function(roomCenter)
+	{
+		//DRAW ROOM LEAF/ROOMCONTAINER CENTER TO OTHER LEAF/ROOMCONTAINER CENTER
+		console.log("RoomContainer.buildPath - from ("+this.center.x+", "+this.center.y+") to ("+roomCenter.x+", "+roomCenter.y+")");
+		var bmd_blueBorder = game.add.bitmapData(this.center.x, this.center.y);
+		bmd_blueBorder.rect(0, 0, roomCenter.x-this.center.x, (roomCenter.y-this.center.y)+1);
+		bmd_blueBorder.fill(0, 102, 255);
+		//bmd_blueBorder.clear(1, 1, this.w-2, this.h-2);
+		game.add.sprite(this.center.x, this.center.y, bmd_blueBorder);
+	},
+
 	paint: function()
 	{
 		//console.log("RoomContainer.paint() - drawing "+this.w+" x "+this.h+" room at "+this.x+", "+this.y);
@@ -335,14 +317,56 @@ RoomContainer.prototype = {
 		bmd_greenBorder.fill(51, 204, 51);
 		bmd_greenBorder.clear(1, 1, this.w-2, this.h-2);
 		game.add.sprite(this.x, this.y, bmd_greenBorder);
+
+		var bmd_greenSquare = game.add.bitmapData(8, 8);
+		bmd_greenSquare.rect(0, 0, 8, 8);
+		bmd_greenSquare.fill(51, 204, 51);
+		console.log("adding red square to "+(this.center.x-4)+", "+(this.center.y-4));
+		game.add.sprite(this.center.x-4, this.center.y-4, bmd_greenSquare);
 	}
 };
 
 //====================================================
-//		PATH FUNCTIONS
+//		ROOM STUFF
 //====================================================
 
+var Room = function(x, y, w, h)
+{
+	this.x = x;
+	this.y = y;
+	this.w = w;
+	this.h = h;
+	this.center = new Point(this.x + this.w/2, this.y + this.h/2);
+};
 
+Room.prototype = {
+	buildPath: function(roomCenter)
+	{
+		//DRAW ROOM LEAF/ROOMCONTAINER CENTER TO OTHER LEAF/ROOMCONTAINER CENTER
+		console.log("Room.buildPath - from ("+this.center.x+", "+this.center.y+") to ("+roomCenter.x+", "+roomCenter.y+")");
+		var bmd_blueBorder = game.add.bitmapData(this.center.x, this.center.y);
+		bmd_blueBorder.rect(0, 0, roomCenter.x-this.center.x, (roomCenter.y-this.center.y)+1);
+		bmd_blueBorder.fill(0, 102, 255);
+		//bmd_blueBorder.clear(1, 1, this.w-2, this.h-2);
+		game.add.sprite(this.center.x, this.center.y, bmd_blueBorder);
+	},
+
+	paint: function()
+	{
+		//console.log("Room.paint() - drawing "+this.w+" x "+this.h+" room at "+this.x+", "+this.y);
+		var bmd_blueBorder = game.add.bitmapData(this.w, this.h);
+		bmd_blueBorder.rect(0, 0, this.w, this.h);
+		bmd_blueBorder.fill(0, 102, 255);
+		bmd_blueBorder.clear(1, 1, this.w-2, this.h-2);
+		game.add.sprite(this.x, this.y, bmd_blueBorder);
+
+		var bmd_blueSquare = game.add.bitmapData(8, 8);
+		bmd_blueSquare.rect(0, 0, 8, 8);
+		bmd_blueSquare.fill(0, 102, 255);
+		console.log("adding blue square to "+(this.center.x-4)+", "+(this.center.y-4));
+		game.add.sprite(this.center.x-4, this.center.y-4, bmd_blueSquare);
+	}
+};
 
 //====================================================
 //		FUNCTIONS
