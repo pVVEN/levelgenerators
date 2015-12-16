@@ -66,7 +66,7 @@ BSP.prototype = {
 		console.log("building paths");
 
 		this.buildPaths(this.roomTree);
-		//this.drawTiles();
+		this.drawTiles();
 
 		//this.drawGrid();
 		this.drawPartitions();
@@ -82,8 +82,10 @@ BSP.prototype = {
 	{
 		var leafs = this.roomTree.getLeaves();
 
+		console.log("growRooms - "+leafs.length+" rooms");
 		for(var i = 0; i < leafs.length; i++)
 		{
+			//leafs[i].setCenter();
 			leafs[i].growRoom();
 			this.rooms.push(leafs[i].room);
 		}
@@ -103,6 +105,9 @@ BSP.prototype = {
 				tree.lChild.leaf.room.buildPath(tree.rChild.leaf.room.center);
 			}
 			*/
+			console.log(tree.lChild.leaf);
+			console.log(tree.rChild.leaf);
+			console.log("--------------");
 			tree.lChild.leaf.buildPath(tree.rChild.leaf.center);
 
 			this.buildPaths(tree.lChild);
@@ -254,75 +259,109 @@ var RoomContainer = function(x, y, w, h)
 //RoomContainer.prototype = Object.create(Room.prototype);
 //RoomContainer.prototype.constructor = RoomContainer;
 RoomContainer.prototype = {
+	/*
+	setCenter: function()
+	{
+		this.center = new Point(this.x + this.w/2, this.y + this.h/2);
+		console.log("roomContainer center after: "+this.center.x+", "+this.center.y);
+	},
+*/
 	growRoom: function()
 	{
 		var x, y, w, h, padX, padY, sizeX, sizeY, randWOne, randHOne, tileX, tileY, tileW, tileH;
 
-		//console.log("growRoom() - this x: "+this.x+", y: "+this.y+", w: "+this.w+", h: "+this.h);
 		//rooms given random padding
 		padX = random(1, 3) * TILE_SIZE; //using 1 instead of 0 because we don't want walls to touch
 		padY = random(1, 3) * TILE_SIZE;
-		//console.log("padX: "+padX+", padY: "+padY);
 		x = this.x + padX;
 		y = this.y + padY;
-		//console.log("x: "+x+", y: "+y);
 		w = this.w - (x - this.x);
 		h = this.h - (y - this.y);
-		//console.log("this.w - (x - this.x): "+w);
-		//console.log("this.h - (y - this.y): "+h);
 		sizeX = random(1, 3) * TILE_SIZE;
 		sizeY = random(1, 3) * TILE_SIZE;
 		w -= sizeX;
 		h -= sizeY;
-		//console.log("sizeX: "+sizeX+", sizeY: "+sizeY+", w: "+w+", h: "+h);
 
 		//update level array
 		tileX = (x/TILE_SIZE);//-1; //removing the -1 part fits tiles within drawn borders
 		tileY = (y/TILE_SIZE);//-1;
 		tileW = (w/TILE_SIZE)+tileX;
 		tileH = (h/TILE_SIZE)+tileY;
-		//console.log("    tileX: "+tileX+", tileY: "+tileY+", tileW: "+tileW+", tileH: "+tileH);
 		for(var c = tileY; c < tileH; c++)
 		{
-			//console.log("    c: "+c+", h: "+(h/TILE_SIZE));
 			for(var r = tileX; r < tileW; r++)
 			{
-				//console.log("    r: "+r+", w: "+(w/TILE_SIZE));
 				levelArr[c][r] = 1;
-				//console.log("    levelArr["+c+"]["+r+"]: "+levelArr[c][r]);
 			}
 		}
 
-		//console.log("    new room("+x+", "+y+", "+w+", "+h+")");
 		this.room = new Room(x, y, w, h);
-		//console.log("---------------------------------------------------------");
 	},
 
 	buildPath: function(roomCenter)
 	{
 		//DRAW ROOM LEAF/ROOMCONTAINER CENTER TO OTHER LEAF/ROOMCONTAINER CENTER
 		console.log("RoomContainer.buildPath - from ("+this.center.x+", "+this.center.y+") to ("+roomCenter.x+", "+roomCenter.y+")");
-		var bmd_blueBorder = game.add.bitmapData(this.center.x, this.center.y);
-		bmd_blueBorder.rect(0, 0, roomCenter.x-this.center.x, (roomCenter.y-this.center.y)+1);
-		bmd_blueBorder.fill(0, 102, 255);
-		//bmd_blueBorder.clear(1, 1, this.w-2, this.h-2);
-		game.add.sprite(this.center.x, this.center.y, bmd_blueBorder);
+		var thisCenterTileX = Math.floor(this.center.x / TILE_SIZE);
+		var thisCenterTileY = Math.floor(this.center.y / TILE_SIZE);
+		var roomCenterTileX = Math.floor(roomCenter.x / TILE_SIZE);
+		var roomCenterTileY = Math.floor(roomCenter.y / TILE_SIZE);
+
+		var newWidth;
+		var newHeight;
+
+		if(thisCenterTileX == roomCenterTileX)
+		{
+			newWidth = (roomCenterTileX - thisCenterTileX) + 1;
+			newHeight = roomCenterTileY - thisCenterTileY;
+
+			for(var v = thisCenterTileY; v < roomCenterTileY; v++)
+			{
+				if(levelArr[v][roomCenterTileX] == 0)
+				{
+					levelArr[v][roomCenterTileX] = 1;
+				}
+			}
+		}else if(thisCenterTileY == roomCenterTileY){
+			newWidth = roomCenterTileX - thisCenterTileX;
+			newHeight = (roomCenterTileY - thisCenterTileY) + 1;
+
+			for(var h = thisCenterTileX; h < roomCenterTileX; h++)
+			{
+				if(levelArr[roomCenterTileY][h] == 0)
+				{
+					levelArr[roomCenterTileY][h] = 1;
+				}
+			}
+		}
+
+		/*
+		console.log("    newWidth: "+newWidth+", newHeight: "+newHeight);
+		var bmd_blueBorder = game.add.bitmapData(newWidth * TILE_SIZE, newHeight * TILE_SIZE);
+		bmd_blueBorder.rect(0, 0, newWidth * TILE_SIZE, newHeight * TILE_SIZE);
+		bmd_blueBorder.fill(255, 0, 0);
+		//bmd_blueBorder.clear(1, 1, newWidth-2, newHeight-2);
+		game.add.sprite(thisCenterTileX * TILE_SIZE, thisCenterTileY * TILE_SIZE, bmd_blueBorder);
+		*/
 	},
 
 	paint: function()
 	{
-		//console.log("RoomContainer.paint() - drawing "+this.w+" x "+this.h+" room at "+this.x+", "+this.y);
-		var bmd_greenBorder = game.add.bitmapData(this.w, this.h);
-		bmd_greenBorder.rect(0, 0, this.w, this.h);
-		bmd_greenBorder.fill(51, 204, 51);
-		bmd_greenBorder.clear(1, 1, this.w-2, this.h-2);
-		game.add.sprite(this.x, this.y, bmd_greenBorder);
+		if(this.room != undefined)
+		{
+			//console.log("RoomContainer.paint() - drawing "+this.w+" x "+this.h+" room at "+this.x+", "+this.y);
+			var bmd_greenBorder = game.add.bitmapData(this.w, this.h);
+			bmd_greenBorder.rect(0, 0, this.w, this.h);
+			bmd_greenBorder.fill(51, 204, 51);
+			bmd_greenBorder.clear(1, 1, this.w-2, this.h-2);
+			game.add.sprite(this.x, this.y, bmd_greenBorder);
 
-		var bmd_greenSquare = game.add.bitmapData(8, 8);
-		bmd_greenSquare.rect(0, 0, 8, 8);
-		bmd_greenSquare.fill(51, 204, 51);
-		console.log("adding red square to "+(this.center.x-4)+", "+(this.center.y-4));
-		game.add.sprite(this.center.x-4, this.center.y-4, bmd_greenSquare);
+			var bmd_greenSquare = game.add.bitmapData(8, 8);
+			bmd_greenSquare.rect(0, 0, 8, 8);
+			bmd_greenSquare.fill(51, 204, 51);
+			//console.log("adding green square to "+(this.center.x-4)+", "+(this.center.y-4));
+			game.add.sprite(this.center.x-4, this.center.y-4, bmd_greenSquare);
+		}
 	}
 };
 
